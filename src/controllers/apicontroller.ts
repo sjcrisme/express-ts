@@ -3,6 +3,20 @@ import { Router, Request, Response } from 'express';
 import * as jwt from "jsonwebtoken";
 
 const router: Router = Router();
+const users = [{
+    id:1,
+    username: 'tester',
+    password: '12345',
+    email:'teste@test.ua',
+    avatar:'1.png'
+},
+{
+    id:2,
+    username: 'admin',
+    password: 'admin',
+    email:'admin@not-test.ua',
+    avatar:'admin.png'
+}];
 
 router.get('/', (req: Request, res: Response) => {
   res.status(200).send({
@@ -28,22 +42,19 @@ router.get('/userinfo', verifyToken, (req, res) => {
 
 router.post('/authenticate', (req, res) => {
 
-  const user = {
-    id:1,
-    uname:'tester',
-    password:'123'
-  };
-
-  jwt.sign({user:user},'secretkey',(err, token) => {
-    res.json({
-      token: token
-    });
-  });
-
-  console.log('req',req.body);
-  // res.status(200).send({
-  //   message: 'POST  API'
-  // });
+    let user = users.find((u) => u.username == req.body.username && u.password == req.body.password);
+    if (user !== undefined) {
+        console.log(user);
+        jwt.sign({user},'secretkey',(err, token) => {
+            res.json({
+                token: token
+            });
+        });
+    } else {
+        res.status(400).send({message: 'Password or login don\'t match'});
+    }
+    // console.log('--', req.body.username);
+    // console.log('==', req.body.password);
 });
 
 function verifyToken(req, res, next) {
